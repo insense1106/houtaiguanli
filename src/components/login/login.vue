@@ -1,6 +1,13 @@
 <template>
-  <div>
-    <h3>login</h3>
+  <div class="root">
+    <div class="wrapper-login">
+      <div class="content">
+        <div class="avatar-box">
+          <img src="" alt="" />
+        </div>
+        login
+      </div>
+    </div>
   </div>
 </template>
 
@@ -20,4 +27,16 @@ export default {
 };
 </script>
 
-<style lang="stylus" scoped></style>
+<style lang="stylus" scoped>
+.root
+  height 100%
+  background-color #2b3b4b
+  .content
+    width 400px
+    height 300px
+    background-color #fff
+    position absolute
+    top 50%
+    left 50%
+    transform translate(-50%, -50%)
+</style>

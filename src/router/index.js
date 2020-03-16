@@ -15,6 +15,16 @@ const routes = [
     }
   },
   {
+    path: "/home",
+    name: "home",
+    component: () => {
+      return import("../components/home/home.vue");
+    },
+    meta: {
+      title: "home"
+    }
+  },
+  {
     path: "/",
     name: "root",
     redirect: "/login"

@@ -4,20 +4,40 @@
       <div class="content">
         <!-- 头像区域 -->
         <div class="avatar-box">
-          <img src="../../assets/img/model.jpg" alt="#" />
+          <img src="../../assets/img/bear.jpg" alt="#" />
         </div>
         <!-- 表单区域 -->
-        <form action="post" class="form">
-          <div><span>user</span> <input class="user" type="text" /></div>
-          <div>
-            <span>password</span>
-            <input class="pwd" type="text" />
-          </div>
-          <div class="button-box">
-            <button type="button">name</button>
-            <button type="button">semon</button>
-          </div>
-        </form>
+
+        <el-form
+          label-width="0px"
+          :rules="formRules"
+          :model="form"
+          class="form-box"
+          ref="formRef"
+        >
+          <!-- 用户名  -->
+          <el-form-item prop="username">
+            <el-input prefix-icon="icon-user" v-model="form.name"></el-input>
+          </el-form-item>
+          <!-- 密码 -->
+          <el-form-item prop="pwd">
+            <el-input
+              prefix-icon="icon-redo"
+              v-model="form.pwd"
+              type="password"
+            ></el-input>
+          </el-form-item>
+          <!-- 按钮区域 -->
+          <el-form-item class="button-box">
+            <el-button type="primary" @click="loginForm('formRef')"
+              >登录</el-button
+            >
+            <el-button type="info" @click="resetForm('formRef')"
+              >重置</el-button
+            >
+          </el-form-item>
+        </el-form>
+
         <div class="form-box"></div>
       </div>
     </div>
@@ -30,13 +50,60 @@ export default {
   components: {},
   props: {},
   data() {
-    return {};
+    return {
+      form: { name: "semon", pwd: "123123" },
+      // 表单验证规则  对象
+      formRules: {
+        //验证用户名合法性
+        username: [
+          { required: true, message: "请输入", trigger: "blur" },
+          {
+            min: 6,
+            max: 10,
+            message: "长度6-10",
+            trigger: "blur"
+          }
+        ],
+        //验证密码合法性
+        pwd: [
+          { required: true, message: "请输入", trigger: "blur" },
+          {
+            min: 6,
+            max: 15,
+            message: "长度为6-15位",
+            trigger: "blur"
+          }
+        ]
+      }
+    };
   },
+
   computed: {},
   watch: {},
   created() {},
   mounted() {},
-  methods: {}
+  methods: {
+    // 重置表单 输入框
+    resetForm(nameRef) {
+      this.$refs[nameRef].resetFields();
+    },
+    // 登录 提交并校验
+    loginForm(nameRef) {
+      // valid为服务器返回的数据
+      this.$refs[nameRef].validate(async valid => {
+        // 如果valid 不存在
+        if (!valid) return this.$message.error("server res  fail");
+        //如果valid 存在;  获取接口指定的数据
+        const { data: res } = await this.$http.post("login", this.form);
+        // 根据服务器的状态码 判断 账号是否存在
+        if (res.meta.status !== 200) return this.$message.error("login fail");
+        this.$message.success("login success");
+        // 设置令牌的保存 位置
+        window.sessionStorage.setItem("token", res.data.token);
+        this.$router.push({ name: "home" });
+      });
+    }
+  }
 };
 </script>
 
@@ -68,14 +135,13 @@ export default {
         height 100%
         border-radius 50%
         background-color #eee
-
-    .form
-      border 1px solid
-      background-color #2f5f4f
-      height 100px
-      padding-top 40px
-      .user
-        margin-left 35px
-      .button-box
-        margin-left 73px
+.form-box
+   position absolute
+   bottom 0
+   width 100%
+   padding 0 20px
+   box-sizing border-box
+  .button-box
+    display flex
+    justify-content flex-end
 </style>

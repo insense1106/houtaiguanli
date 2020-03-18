@@ -17,7 +17,10 @@
         >
           <!-- 用户名  -->
           <el-form-item prop="username">
-            <el-input prefix-icon="icon-user" v-model="form.name"></el-input>
+            <el-input
+              prefix-icon="icon-user"
+              v-model="form.username"
+            ></el-input>
           </el-form-item>
           <!-- 密码 -->
           <el-form-item prop="pwd">
@@ -35,6 +38,10 @@
             <el-button type="info" @click="resetForm('formRef')"
               >重置</el-button
             >
+
+            <el-button type="sucess" @click="registerForm('formRef')"
+              >注册</el-button
+            >
           </el-form-item>
         </el-form>
 
@@ -51,14 +58,14 @@ export default {
   props: {},
   data() {
     return {
-      form: { name: "semon", pwd: "123123" },
+      form: { username: "semon", pwd: "123123" },
       // 表单验证规则  对象
       formRules: {
         //验证用户名合法性
         username: [
           { required: true, message: "请输入", trigger: "blur" },
           {
-            min: 6,
+            min: 3,
             max: 10,
             message: "长度6-10",
             trigger: "blur"
@@ -83,24 +90,75 @@ export default {
   created() {},
   mounted() {},
   methods: {
-    // 重置表单 输入框
+    // 事件层 注册
+    registerForm(nameRef) {
+      this.$refs[nameRef].validate(async valid => {
+        // vaild   登录账户 信息是否符号 书写去要求
+        if (!valid)
+          return this.$message.error("账户 或者 密码 存在不规范的地方, 请检查");
+        await this.$http({
+          method: "post",
+          url: "/user/reg",
+          data: { us: this.form.username, ps: this.form.pwd }
+        })
+          .then(res => {
+            console.log(res.data);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      });
+    },
+    // 事件层 重置表单 输入框
     resetForm(nameRef) {
       this.$refs[nameRef].resetFields();
     },
-    // 登录 提交并校验
+    // 事件层 点击 登录
     loginForm(nameRef) {
       // valid为服务器返回的数据
-      this.$refs[nameRef].validate(async valid => {
-        // 如果valid 不存在
-        if (!valid) return this.$message.error("server res  fail");
-        //如果valid 存在;  获取接口指定的数据
-        const { data: res } = await this.$http.post("login", this.form);
-        // 根据服务器的状态码 判断 账号是否存在
-        if (res.meta.status !== 200) return this.$message.error("login fail");
-        this.$message.success("login success");
-        // 设置令牌的保存 位置
-        window.sessionStorage.setItem("token", res.data.token);
-        this.$router.push({ name: "home" });
+      this.$refs[nameRef].validate(valid => {
+        // vaild   登录账户 信息是否符号 书写去要求
+        if (!valid)
+          return this.$message.error("账户 或者 密码 存在不规范的地方, 请检查");
+        //如果valid为true , 用户输入 规范, 发送网络请求
+        this.postRequest().then(res => {
+          console.log(res.data);
+          console.log(res);
+          if (res.data.err != 0) return this.$message.error(res.data.msg);
+
+          this.$message.success(res.data.msg);
+        });
+      });
+      // 根据服务器的状态码 判断 账号是否存在
+      // if (res.meta.status !== 200) return this.$message.error("login fail");
+      // this.$message.success("login success");
+      // // 设置令牌的保存 位置
+      // window.sessionStorage.setItem("token", res.data.token);
+      // this.$router.push({ name: "home" });
+    },
+    //网络层
+    getRequest() {
+      this.$http({
+        method: "get",
+        url: "/user/login",
+        params: {
+          us: this.form.username,
+          ps: this.form.pwd
+        }
+      }).then(res => {
+        console.log(res);
+        console.log("server");
+      });
+    },
+    //网络层
+    postRequest() {
+      return this.$http({
+        method: "post",
+        url: "/user/login",
+        data: {
+          us: this.form.username,
+          ps: this.form.pwd
+        }
       });
     }
   }

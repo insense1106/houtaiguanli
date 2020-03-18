@@ -6,5 +6,5 @@ Vue.use(Button);
 Vue.use(Form);
 Vue.use(FormItem);
 Vue.use(Input);
-// 把组件 挂载到vue 上面;
+// toast 组件 挂载到vue 上面;
 Vue.prototype.$message = Message;
